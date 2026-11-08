@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Script: Like Winisis Search
  * Author: Roger Craveiro Guilherme
@@ -12,9 +13,6 @@ if (!class_exists('PluginBridge')) {
 
 $bridge = PluginBridge::getInstance();
 
-/**
- * Helper to adapt UTF-8 .tab strings to the active ABCD $charset (ISO-8859-1 or UTF-8)
- */
 if (!function_exists('like_winisis_charset')) {
     function like_winisis_charset(string $text): string
     {
@@ -51,39 +49,82 @@ abcd_add_hook('dataentry_footer', function (string $html) use ($bridge): string 
     global $msgstr;
 
     $title = htmlspecialchars(like_winisis_charset($msgstr['like_winisis_title'] ?? 'Legacy Search'));
-    $placeholder = htmlspecialchars(like_winisis_charset($msgstr['like_winisis_placeholder'] ?? '?p(v10)'));
+    $placeholder = htmlspecialchars(like_winisis_charset($msgstr['like_winisis_placeholder'] ?? '?v10:"Maria" AND v20:"Brasil"'));
+    $searchBtn = htmlspecialchars(like_winisis_charset($msgstr['like_winisis_search_btn'] ?? 'Search'));
+    $saveBtn = htmlspecialchars(like_winisis_charset($msgstr['like_winisis_save_btn'] ?? 'Save expression'));
+    $resetBtn = htmlspecialchars(like_winisis_charset($msgstr['like_winisis_reset_btn'] ?? 'Clear results'));
     $emptyMsg = htmlspecialchars(like_winisis_charset($msgstr['like_winisis_empty'] ?? 'No records found.'));
     $errorMsg = htmlspecialchars(like_winisis_charset($msgstr['like_winisis_error'] ?? 'Syntax error.'));
-    $fieldMsg = htmlspecialchars(like_winisis_charset($msgstr['like_winisis_field_content'] ?? 'Field'));
+    $fieldMsg = htmlspecialchars(like_winisis_charset($msgstr['like_winisis_field_content'] ?? 'Content'));
+    $historyTitle = htmlspecialchars(like_winisis_charset($msgstr['like_winisis_history_title'] ?? 'Session History'));
+    $savedTitle = htmlspecialchars(like_winisis_charset($msgstr['like_winisis_saved_title'] ?? 'Saved Expressions'));
+    $clearTxt = htmlspecialchars(like_winisis_charset($msgstr['like_winisis_clear_history'] ?? 'Clear'));
+    $syncedTxt = htmlspecialchars(like_winisis_charset($msgstr['like_winisis_session_synced'] ?? 'Synced with Selected Records'));
 
-    $helpTitle = htmlspecialchars(like_winisis_charset($msgstr['like_winisis_help_title'] ?? 'Como usar:'));
-    $helpP = like_winisis_charset($msgstr['like_winisis_help_p'] ?? '<b>?p(vXX)</b>: Presença');
-    $helpMfn = like_winisis_charset($msgstr['like_winisis_help_mfn'] ?? '<b>?mfn>XX</b>: MFN');
-    $helpStr = like_winisis_charset($msgstr['like_winisis_help_str'] ?? '<b>? vXX:"texto"</b>: String');
-    $helpStrRange = like_winisis_charset($msgstr['like_winisis_help_str_range'] ?? '<b>? *1,20 vXX:"texto"</b>: String com limite');
+    $helpTitle = htmlspecialchars(like_winisis_charset($msgstr['like_winisis_help_title'] ?? 'Supported syntax:'));
+    $helpP = like_winisis_charset($msgstr['like_winisis_help_p'] ?? '<b>?p(vXX)</b> / <b>?a(vXX)</b>');
+    $helpMfn = like_winisis_charset($msgstr['like_winisis_help_mfn'] ?? '<b>?mfn>XX</b> / <b>?mfn<XX</b>');
+    $helpStr = like_winisis_charset($msgstr['like_winisis_help_str'] ?? '<b>?vXX:"text"</b>');
+    $helpComb = like_winisis_charset($msgstr['like_winisis_help_comb'] ?? '<b>?v10:"A" AND v20:"B"</b>');
+    $helpStrRange = like_winisis_charset($msgstr['like_winisis_help_str_range'] ?? '<b>?*10,125 v0:"text"</b>');
 
     $sidebar = '
-<div id="like-winisis-sidebar" class="winisis-sidebar">
-    <div class="winisis-header">
-        <h4><i class="fas fa-terminal"></i> ' . $title . '</h4>
-        <button type="button" id="like-winisis-close">&times;</button>
-    </div>
-    <div class="winisis-body">
-        <input type="text" id="like-winisis-input" placeholder="' . $placeholder . '">
-        <div id="like-winisis-results">
-            <!-- Mini Help inicial -->
-            <div class="winisis-help">
-                <h5>' . $helpTitle . '</h5>
-                <ul>
-                    <li>' . $helpP . '</li>
-                    <li>' . $helpMfn . '</li>
-                    <li>' . $helpStr . '</li>
-                    <li>' . $helpStrRange . '</li>
-                </ul>
+    <div id="like-winisis-sidebar" class="winisis-sidebar">
+        <div class="winisis-header">
+            <h4><i class="fas fa-terminal"></i> ' . $title . '</h4>
+            <button type="button" id="like-winisis-close">&times;</button>
+        </div>
+        <div class="winisis-body">
+            <div class="winisis-input-group">
+                <input type="text" id="like-winisis-input" placeholder="' . $placeholder . '">
+                <button type="button" id="like-winisis-exec-btn" class="winisis-icon-btn primary" title="' . $searchBtn . '">
+                    <i class="fas fa-play"></i>
+                </button>
+                <button type="button" id="like-winisis-save-btn" class="winisis-icon-btn" title="' . $saveBtn . '">
+                    <i class="fas fa-bookmark"></i>
+                </button>
+                <!-- NOVO BOTÃO DE RESET AQUI: -->
+                <button type="button" id="like-winisis-reset-btn" class="winisis-icon-btn" title="' . $resetBtn . '">
+                    <i class="fas fa-eraser"></i>
+                </button>
+            </div>
+
+            <div id="like-winisis-session-bar" class="winisis-session-bar" style="display:none;">
+                <span id="like-winisis-count-badge"></span>
+                <span class="winisis-sync-tag"><i class="fas fa-link"></i> ' . $syncedTxt . '</span>
+            </div>
+
+            <div class="winisis-panels-Accordion">
+                <details id="like-winisis-history-details">
+                    <summary>
+                        <span><i class="fas fa-history"></i> ' . $historyTitle . '</span>
+                        <a href="javascript:void(0);" id="like-winisis-clear-history" class="winisis-mini-link">' . $clearTxt . '</a>
+                    </summary>
+                    <div id="like-winisis-history-list" class="winisis-expr-list"></div>
+                </details>
+
+                <details id="like-winisis-saved-details">
+                    <summary>
+                        <span><i class="fas fa-bookmark"></i> ' . $savedTitle . '</span>
+                    </summary>
+                    <div id="like-winisis-saved-list" class="winisis-expr-list"></div>
+                </details>
+            </div>
+
+            <div id="like-winisis-results">
+                <div class="winisis-help">
+                    <h5>' . $helpTitle . '</h5>
+                    <ul>
+                        <li>' . $helpP . '</li>
+                        <li>' . $helpMfn . '</li>
+                        <li>' . $helpStr . '</li>
+                        <li>' . $helpComb . '</li>
+                        <li>' . $helpStrRange . '</li>
+                    </ul>
+                </div>
             </div>
         </div>
-    </div>
-</div>';
+    </div>';
 
     $scripts = '<link rel="stylesheet" href="../../content/plugins/like-winisis/assets/css/like-winisis.css">';
     $scripts .= '<script>
