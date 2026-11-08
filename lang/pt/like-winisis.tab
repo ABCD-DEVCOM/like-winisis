@@ -1,0 +1,11 @@
+like_winisis_title=Pesquisa Legada
+like_winisis_placeholder=Insira a sintaxe legada (ex: ?p(v10) ou ?mfn>3)
+like_winisis_search_btn=Pesquisar
+like_winisis_empty=Nenhum registro encontrado.
+like_winisis_error=Erro de sintaxe ou falha na execução.
+like_winisis_field_content=Conteúdo do Campo
+like_winisis_help_title=Como usar a pesquisa legada:
+like_winisis_help_p=<b>?p(vXX)</b>: Presença do campo (ex: ?p(v100))
+like_winisis_help_mfn=<b>?mfn>XX</b> ou <b>?mfn<XX</b>: Intervalo de MFN (ex: ?mfn>3)
+like_winisis_help_str=<b>? vXX:"texto"</b>: Busca de string no campo (ex: ? v0:"Petrarca")
+like_winisis_help_str_range=<b>? *1,20 vXX:"texto"</b>: Busca de string com limite de MFN (ex: ? *10,125 v0:"Petrarca")

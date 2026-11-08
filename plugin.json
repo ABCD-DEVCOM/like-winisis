@@ -1,0 +1,14 @@
+{
+    "name": "Like Winisis Search",
+    "slug": "like-winisis",
+    "version": "1.0.0",
+    "requires": "4.1.0",
+    "config_bridge": true,
+    "description": "Enables legacy Winisis search syntax (?p(v10), ?mfn>3) with contextual side-panel results.",
+    "entry": "index.php",
+    "hooks": [
+        "dataentry_toolbar_search",
+        "dataentry_footer"
+    ],
+    "config_bridge": true
+}

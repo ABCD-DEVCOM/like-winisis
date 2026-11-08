@@ -1,0 +1,11 @@
+like_winisis_title=Búsqueda Heredada
+like_winisis_placeholder=Ingrese sintaxis heredada (ej: ?p(v10) o ?mfn>3)
+like_winisis_search_btn=Buscar
+like_winisis_empty=No se encontraron registros.
+like_winisis_error=Error de sintaxis o fallo de ejecución.
+like_winisis_field_content=Contenido del Campo
+like_winisis_help_title=Cómo usar la búsqueda heredada:
+like_winisis_help_p=<b>?p(vXX)</b>: Presencia del campo (ej: ?p(v100))
+like_winisis_help_mfn=<b>?mfn>XX</b> o <b>?mfn<XX</b>: Rango de MFN (ej: ?mfn>3)
+like_winisis_help_str=<b>? vXX:"texto"</b>: Búsqueda de cadena en campo (ej: ? v0:"Petrarca")
+like_winisis_help_str_range=<b>? *1,20 vXX:"texto"</b>: Búsqueda de cadena con límite de MFN (ej: ? *10,125 v0:"Petrarca")

@@ -1,0 +1,11 @@
+like_winisis_title=Legacy Search
+like_winisis_placeholder=Enter legacy syntax (e.g. ?p(v10) or ?mfn>3)
+like_winisis_search_btn=Search
+like_winisis_empty=No records found.
+like_winisis_error=Syntax error or execution failure.
+like_winisis_field_content=Field Content
+like_winisis_help_title=How to use legacy search:
+like_winisis_help_p=<b>?p(vXX)</b>: Field presence (e.g., ?p(v100))
+like_winisis_help_mfn=<b>?mfn>XX</b> or <b>?mfn<XX</b>: MFN range search (e.g., ?mfn>3)
+like_winisis_help_str=<b>? vXX:"text"</b>: String search in field (e.g., ? v0:"Petrarca")
+like_winisis_help_str_range=<b>? *1,20 vXX:"text"</b>: String search with MFN limit (e.g., ? *10,125 v0:"Petrarca")

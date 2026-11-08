@@ -1,0 +1,11 @@
+like_winisis_title=Recherche Héritée
+like_winisis_placeholder=Entrez la syntaxe héritée (ex: ?p(v10) ou ?mfn>3)
+like_winisis_search_btn=Rechercher
+like_winisis_empty=Aucun enregistrement trouvé.
+like_winisis_error=Erreur de syntaxe ou échec d'exécution.
+like_winisis_field_content=Contenu du Champ
+like_winisis_help_title=Comment utiliser la recherche héritée:
+like_winisis_help_p=<b>?p(vXX)</b>: Présence du champ (ex: ?p(v100))
+like_winisis_help_mfn=<b>?mfn>XX</b> ou <b>?mfn<XX</b>: Plage de MFN (ex: ?mfn>3)
+like_winisis_help_str=<b>? vXX:"texte"</b>: Recherche de chaîne (ex: ? v0:"Petrarca")
+like_winisis_help_str_range=<b>? *1,20 vXX:"texte"</b>: Recherche de chaîne avec limite MFN (ex: ? *10,125 v0:"Petrarca")
