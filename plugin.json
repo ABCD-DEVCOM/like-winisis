@@ -1,7 +1,7 @@
 {
     "name": "Like Winisis Search",
     "slug": "like-winisis",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "requires": "4.1.0",
     "config_bridge": true,
     "description": "Enables legacy Winisis search syntax (?p(v10), ?mfn>3) with contextual side-panel results.",

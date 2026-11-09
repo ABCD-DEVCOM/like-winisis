@@ -11,17 +11,38 @@ if (!class_exists('PluginBridge')) {
     die("Direct access forbidden.");
 }
 
+use ABCD\Common\LanguageManager;
 $bridge = PluginBridge::getInstance();
 
 if (!function_exists('like_winisis_charset')) {
     function like_winisis_charset(string $text): string
     {
-        global $charset;
-        $targetCharset = (!empty($charset) && strtoupper($charset) === 'ISO-8859-1') ? 'ISO-8859-1' : 'UTF-8';
-        if ($targetCharset === 'ISO-8859-1' && mb_check_encoding($text, 'UTF-8')) {
-            return mb_convert_encoding($text, 'ISO-8859-1', 'UTF-8');
+        global $msgstr, $langManager, $charset;
+
+        if (isset($langManager)) {
+            $userLang = $_SESSION["lang"] ?? $_REQUEST["lang"] ?? 'en';
+            $plugin_lang = $langManager->loadPluginTranslations(__DIR__, 'like-winisis', 'like-winisis.tab', $userLang);
+
+            if (is_array($msgstr) && is_array($plugin_lang)) {
+                $msgstr = array_merge($msgstr, $plugin_lang);
+            }
+
+            $targetEncoding = in_array($charset, ['ISO-8859-1', 'ANSI', 'WINDOWS-1252'], true)
+                ? 'ISO-8859-1'
+                : 'UTF-8';
+
+            // Check if the source string from the .tab file is UTF-8 or ISO-8859-1
+            $isStringUtf8 = mb_check_encoding($text, 'UTF-8');
+
+            if ($targetEncoding === 'UTF-8' && !$isStringUtf8) {
+                // File is ISO-8859-1, but current database is UTF-8
+                $text = mb_convert_encoding($text, 'UTF-8', 'ISO-8859-1');
+            } elseif ($targetEncoding === 'ISO-8859-1' && $isStringUtf8) {
+                // File is UTF-8, but current database is ISO-8859-1
+                $text = mb_convert_encoding($text, 'ISO-8859-1', 'UTF-8');
+            }
+            return $msgstr[$text] ?? $text;
         }
-        return $text;
     }
 }
 
@@ -48,20 +69,20 @@ abcd_add_hook('dataentry_toolbar_search', function (string $html) use ($bridge):
 abcd_add_hook('dataentry_footer', function (string $html) use ($bridge): string {
     global $msgstr;
 
-    $title = htmlspecialchars(like_winisis_charset($msgstr['like_winisis_title'] ?? 'Legacy Search'));
-    $placeholder = htmlspecialchars(like_winisis_charset($msgstr['like_winisis_placeholder'] ?? '?v10:"Maria" AND v20:"Brasil"'));
-    $searchBtn = htmlspecialchars(like_winisis_charset($msgstr['like_winisis_search_btn'] ?? 'Search'));
-    $saveBtn = htmlspecialchars(like_winisis_charset($msgstr['like_winisis_save_btn'] ?? 'Save expression'));
-    $resetBtn = htmlspecialchars(like_winisis_charset($msgstr['like_winisis_reset_btn'] ?? 'Clear results'));
-    $emptyMsg = htmlspecialchars(like_winisis_charset($msgstr['like_winisis_empty'] ?? 'No records found.'));
-    $errorMsg = htmlspecialchars(like_winisis_charset($msgstr['like_winisis_error'] ?? 'Syntax error.'));
-    $fieldMsg = htmlspecialchars(like_winisis_charset($msgstr['like_winisis_field_content'] ?? 'Content'));
-    $historyTitle = htmlspecialchars(like_winisis_charset($msgstr['like_winisis_history_title'] ?? 'Session History'));
-    $savedTitle = htmlspecialchars(like_winisis_charset($msgstr['like_winisis_saved_title'] ?? 'Saved Expressions'));
-    $clearTxt = htmlspecialchars(like_winisis_charset($msgstr['like_winisis_clear_history'] ?? 'Clear'));
-    $syncedTxt = htmlspecialchars(like_winisis_charset($msgstr['like_winisis_session_synced'] ?? 'Synced with Selected Records'));
+    $title = like_winisis_charset($msgstr['like_winisis_title'] ?? 'Legacy Search');
+    $placeholder = like_winisis_charset($msgstr['like_winisis_placeholder'] ?? '?v10:"Maria" AND v20:"Brasil"');
+    $searchBtn = like_winisis_charset($msgstr['like_winisis_search_btn'] ?? 'Search');
+    $saveBtn = like_winisis_charset($msgstr['like_winisis_save_btn'] ?? 'Save expression');
+    $resetBtn = like_winisis_charset($msgstr['like_winisis_reset_btn'] ?? 'Clear results');
+    $emptyMsg = like_winisis_charset($msgstr['like_winisis_empty'] ?? 'No records found.');
+    $errorMsg = like_winisis_charset($msgstr['like_winisis_error'] ?? 'Syntax error.');
+    $fieldMsg = like_winisis_charset($msgstr['like_winisis_field_content'] ?? 'Content');
+    $historyTitle = like_winisis_charset($msgstr['like_winisis_history_title'] ?? 'Session History');
+    $savedTitle = like_winisis_charset($msgstr['like_winisis_saved_title'] ?? 'Saved Expressions');
+    $clearTxt = like_winisis_charset($msgstr['like_winisis_clear_history'] ?? 'Clear');
+    $syncedTxt = like_winisis_charset($msgstr['like_winisis_session_synced'] ?? 'Synced with Selected Records');
 
-    $helpTitle = htmlspecialchars(like_winisis_charset($msgstr['like_winisis_help_title'] ?? 'Supported syntax:'));
+    $helpTitle = like_winisis_charset($msgstr['like_winisis_help_title'] ?? 'Supported syntax:');
     $helpP = like_winisis_charset($msgstr['like_winisis_help_p'] ?? '<b>?p(vXX)</b> / <b>?a(vXX)</b>');
     $helpMfn = like_winisis_charset($msgstr['like_winisis_help_mfn'] ?? '<b>?mfn>XX</b> / <b>?mfn<XX</b>');
     $helpStr = like_winisis_charset($msgstr['like_winisis_help_str'] ?? '<b>?vXX:"text"</b>');
