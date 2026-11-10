@@ -41,6 +41,33 @@ while (ob_get_level() > 0) {
 
 header('Content-Type: application/json; charset=utf-8');
 
+/**
+ * Ensures $_SESSION['history'] only contains valid delimited strings ("base$$|$$expression$$|$$total")
+ * so that ABCD core scripts (fmt.php / search_history.php) never throw a TypeError on explode().
+ */
+function sanitizeNativeAbcdHistory(): void
+{
+    if (!isset($_SESSION['history']) || !is_array($_SESSION['history'])) {
+        $_SESSION['history'] = [];
+        return;
+    }
+
+    $cleanHistory = [];
+    foreach ($_SESSION['history'] as $item) {
+        if (is_string($item) && str_contains($item, '$$|$$')) {
+            $cleanHistory[] = $item;
+        } elseif (is_array($item) && isset($item['base'], $item['expresion'])) {
+            $tot = $item['total'] ?? 0;
+            $cleanHistory[] = $item['base'] . '$$|$$' . $item['expresion'] . '$$|$$' . $tot;
+        }
+    }
+
+    $_SESSION['history'] = $cleanHistory;
+}
+
+// Clean any corrupted array entries in $_SESSION['history'] right away
+sanitizeNativeAbcdHistory();
+
 $subAction = trim($_POST['sub_action'] ?? 'search');
 
 // Initialize session storage for legacy search history
@@ -295,17 +322,18 @@ if (!empty($contenido) && is_array($contenido)) {
 
 $totalResults = count($results);
 
-// Save in session history (Winisis style #N (BASE) T=XX : ?expr)
+// 1. Save in the plugin's isolated session history (Winisis style #N (BASE) T=XX : ?expr)
 $normalizedExpr = str_starts_with($rawQuery, '?') ? $rawQuery : ('?' . $rawQuery);
 
-// Remove existing duplicate of same base + expression to move it to top
 foreach ($_SESSION['like_winisis_history'] as $k => $entry) {
     if ($entry['base'] === strtoupper($base) && strcasecmp($entry['expression'], $normalizedExpr) === 0) {
         unset($_SESSION['like_winisis_history'][$k]);
     }
 }
 
+$_SESSION['like_winisis_history'] = array_values($_SESSION['like_winisis_history']);
 $searchNumber = count($_SESSION['like_winisis_history']) + 1;
+
 $_SESSION['like_winisis_history'][] = [
     'id' => $searchNumber,
     'base' => strtoupper($base),
@@ -314,15 +342,11 @@ $_SESSION['like_winisis_history'][] = [
     'timestamp' => date('H:i')
 ];
 
-// Keep also in native ABCD $_SESSION['history'] for compatibility with search_history.php
-if (!isset($_SESSION['history']) || !is_array($_SESSION['history'])) {
-    $_SESSION['history'] = [];
+// 2. Save in native ABCD $_SESSION['history'] strictly as a "$$|$$" delimited string for fmt.php & search_history.php
+$nativeHistoryString = $base . '$$|$$' . $normalizedExpr . '$$|$$' . $totalResults;
+if (!in_array($nativeHistoryString, $_SESSION['history'], true)) {
+    $_SESSION['history'][] = $nativeHistoryString;
 }
-$_SESSION['history'][] = [
-    'base' => $base,
-    'expresion' => $normalizedExpr,
-    'total' => $totalResults
-];
 
 echo json_encode([
     'status' => 'success',
